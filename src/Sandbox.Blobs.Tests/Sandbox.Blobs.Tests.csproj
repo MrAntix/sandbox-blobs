@@ -70,6 +70,9 @@
   <ItemGroup>
     <EmbeddedResource Include="ScannedImages\Foundation-1-skew.jpg" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ScannedImages\Itil-faded-1.jpg" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

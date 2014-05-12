@@ -35,6 +35,10 @@ namespace Sandbox.Blobs.Tests
                 GetType().FindResourceStream("Practitioner-3.jpg"),
                 Path.Combine(dir, "Practitioner-3.png"));
 
+            scanner.Scan(
+                GetType().FindResourceStream("Itil-faded-1.jpg"),
+                Path.Combine(dir, "Itil-faded-1.png"));
+
             Process.Start(dir);
         }
     }

@@ -17,13 +17,14 @@ namespace Sandbox.Blobs
         {
             var bitmap = GetCorrectedBitmap(imageStream);
 
+            // Find +'s
             var blobCounter = new BlobCounter
                 {
                     FilterBlobs = true,
                     MinWidth = 15,
-                    MaxWidth = 30,
+                    MaxWidth = 35,
                     MinHeight = 15,
-                    MaxHeight = 30,
+                    MaxHeight = 35,
                 };
 
             blobCounter.ProcessImage(bitmap);
@@ -34,8 +35,12 @@ namespace Sandbox.Blobs
             foreach (var blob in
                 blobCounter.GetObjectsInformation())
             {
-                if (blob.CenterOfGravity.X < bitmap.Width/2F) leftSet.Add(blob.CenterOfGravity);
-                else rightSet.Add(blob.CenterOfGravity);
+                if (blob.CenterOfGravity.Y > 150
+                    && blob.CenterOfGravity.Y < 1700)
+                {
+                    if (blob.CenterOfGravity.X < bitmap.Width/2F) leftSet.Add(blob.CenterOfGravity);
+                    else rightSet.Add(blob.CenterOfGravity);
+                }
             }
 
             new PointsMarker(leftSet.Points, Color.Green, 10)
@@ -43,10 +48,11 @@ namespace Sandbox.Blobs
             new PointsMarker(rightSet.Points, Color.Red, 10)
                 .ApplyInPlace(bitmap);
 
+            // Find Marks
             blobCounter = new BlobCounter
                 {
                     FilterBlobs = true,
-                    BackgroundThreshold = Color.FromArgb(255, 127, 127, 127),
+                    BackgroundThreshold = Color.FromArgb(255, 85, 85, 85),
                     MinWidth = 25,
                     MaxWidth = 80,
                     MinHeight = 12,
@@ -96,28 +102,51 @@ namespace Sandbox.Blobs
             var bitmap = new Bitmap(imageStream);
 
             new Invert().ApplyInPlace(bitmap);
-            using (var grayBitmap = Grayscale.CommonAlgorithms.BT709.Apply(bitmap))
+
+            bitmap = MakeGrayBitmap(bitmap);
+            bitmap = DeskewBitmap(bitmap);
+            bitmap = ColorBitmap(bitmap);
+
+            return ResizeAndCropBitmap(bitmap);
+        }
+
+        static Bitmap ColorBitmap(Bitmap bitmap)
+        {
+            using (bitmap)
             {
-                var skewChecker = new DocumentSkewChecker();
-                var angle = skewChecker.GetSkewAngle(grayBitmap);
-
-                if (Math.Abs(angle) < 45)
-                {
-                    bitmap.Dispose();
-
-                    var rotationFilter = new RotateBilinear(-angle)
-                        {
-                            FillColor = Color.White
-                        };
-
-                    using (var rotatedBitmap = rotationFilter.Apply(grayBitmap))
-                    {
-                        return new GrayscaleToRGB().Apply(rotatedBitmap);
-                    }
-                }
+                return new GrayscaleToRGB().Apply(bitmap);
             }
+        }
 
-            return bitmap;
+        static Bitmap MakeGrayBitmap(Bitmap bitmap)
+        {
+            using (bitmap)
+            {
+                return Grayscale.CommonAlgorithms.BT709.Apply(bitmap);
+            }
+        }
+
+        static Bitmap DeskewBitmap(Bitmap bitmap)
+        {
+            var skewChecker = new DocumentSkewChecker();
+            var angle = skewChecker.GetSkewAngle(bitmap);
+
+            if (Math.Abs(angle) > 45) return bitmap;
+
+            var rotationFilter = new RotateBilinear(-angle)
+                {
+                    FillColor = Color.White
+                };
+
+            return rotationFilter.Apply(bitmap);
+        }
+
+        static Bitmap ResizeAndCropBitmap(Bitmap bitmap)
+        {
+            using (bitmap)
+            {
+                return new ResizeBilinear(1250, 1900).Apply(bitmap);
+            }
         }
     }
 
