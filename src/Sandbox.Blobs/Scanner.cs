@@ -34,8 +34,8 @@ namespace Sandbox.Blobs
             foreach (var blob in
                 blobCounter.GetObjectsInformation())
             {
-                leftSet.Add(blob.CenterOfGravity);
-                rightSet.Add(blob.CenterOfGravity);
+                if (blob.CenterOfGravity.X < bitmap.Width/2F) leftSet.Add(blob.CenterOfGravity);
+                else rightSet.Add(blob.CenterOfGravity);
             }
 
             new PointsMarker(leftSet.Points, Color.Green, 10)
@@ -132,6 +132,8 @@ namespace Sandbox.Blobs
             Func<Set, float, bool> test = null,
             int threshold = 10)
         {
+            Points = new List<IntPoint>();
+
             _resetIf = test ?? ((c1, c2) => false);
             _getValue = getValue;
             _threshold = threshold;
