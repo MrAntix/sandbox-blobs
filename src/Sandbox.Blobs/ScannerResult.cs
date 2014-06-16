@@ -2,6 +2,7 @@
 {
     public class ScannerResult
     {
-        public int Answer { get; set; }
+        public string CandidateNumber { get; set; }
+        public string[] Answers { get; set; }
     }
 }
